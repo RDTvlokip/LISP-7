@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LISP-7 - Destructive Semantic Encoding</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .tab.active {
+            background: white;
+            color: #764ba2;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        textarea, input[type="text"], select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        textarea:focus, input:focus, select:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .result-text {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #764ba2;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .error {
+            background: #fff5f5;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .level-info {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .level-info h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .level-info ul {
+            margin-left: 20px;
+            color: #555;
+        }
+
+        .level-info li {
+            margin-bottom: 5px;
+        }
+
+        .key-display {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .key-display code {
+            display: block;
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+        }
+
+        .security-warning {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .security-warning strong {
+            color: #856404;
+        }
+
+        .security-warning ul {
+            margin: 10px 0 0 20px;
+        }
+
+        .upload-area {
+            border: 2px dashed #e0e0e0;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f8f9fa;
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .upload-label {
+            cursor: pointer;
+            color: #666;
+        }
+
+        .upload-label span {
+            display: block;
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LISP-7</h1>
+        <p class="subtitle">Linguistic Irreversible Scrambling Protocol - Destructive Semantic Encoding</p>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('compress')">Compress</button>
+            <button class="tab" onclick="showTab('upload')">Upload</button>
+            <button class="tab" onclick="showTab('decompress')">Decompress</button>
+        </div>
+
+        <div class="card">
+            <!-- Compress Tab -->
+            <div id="compress-tab" class="tab-content active">
+                <div class="level-info">
+                    <h4>Compression Levels</h4>
+                    <ul>
+                        <li><strong>Level 1:</strong> Vowel removal</li>
+                        <li><strong>Level 2:</strong> Extended removal (vowels + h, w, y)</li>
+                        <li><strong>Level 3:</strong> Triadic extraction (first, middle, last)</li>
+                        <li><strong>Level 4:</strong> Chaos markers</li>
+                        <li><strong>Level 5:</strong> Letter permutation</li>
+                        <li><strong>Level 6:</strong> Word scrambling</li>
+                        <li><strong>Level 7:</strong> Alphabet mutation (maximum security)</li>
+                    </ul>
+                </div>
+
+                <label for="inputText">Text to compress:</label>
+                <textarea id="inputText" placeholder="Enter text to compress..."></textarea>
+
+                <label for="levelSelect">Compression Level:</label>
+                <select id="levelSelect">
+                    <option value="1">Level 1 - Vowel Removal</option>
+                    <option value="2">Level 2 - Extended Removal</option>
+                    <option value="3" selected>Level 3 - Triadic Extraction</option>
+                    <option value="4">Level 4 - Chaos Markers</option>
+                    <option value="5">Level 5 - Letter Permutation</option>
+                    <option value="6">Level 6 - Word Scrambling</option>
+                    <option value="7">Level 7 - Alphabet Mutation</option>
+                </select>
+
+                <button onclick="compressText()">Compress</button>
+
+                <div class="error" id="compressError"></div>
+
+                <div class="result" id="compressResult">
+                    <h3>Compressed Text</h3>
+                    <div class="result-text" id="compressedText"></div>
+
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value" id="originalSize">-</div>
+                            <div class="stat-label">Original</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="compressedSize">-</div>
+                            <div class="stat-label">Compressed</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="compressionRatio">-</div>
+                            <div class="stat-label">Ratio</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="levelUsed">-</div>
+                            <div class="stat-label">Level</div>
+                        </div>
+                    </div>
+
+                    <div id="alphabetKeyDisplay" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Upload Tab -->
+            <div id="upload-tab" class="tab-content">
+                <div class="upload-area">
+                    <label class="upload-label" for="fileInput">
+                        <span>📄</span>
+                        Click to upload a compressed .txt file
+                    </label>
+                    <input type="file" id="fileInput" accept=".txt" onchange="uploadFile()">
+                </div>
+
+                <div class="error" id="uploadError"></div>
+
+                <div class="result" id="uploadResult">
+                    <h3>Decompressed Content</h3>
+                    <div class="result-text" id="decompressedContent"></div>
+
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value" id="uploadCompressedSize">-</div>
+                            <div class="stat-label">Compressed</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="uploadDecompressedSize">-</div>
+                            <div class="stat-label">Decompressed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Decompress Tab -->
+            <div id="decompress-tab" class="tab-content">
+                <div class="security-warning">
+                    <strong>Level 7 Security:</strong> To decompress, you need:
+                    <ul>
+                        <li>The compressed text in the <strong>database</strong></li>
+                        <li>The <strong>correct alphabet_key</strong> (matching this text)</li>
+                    </ul>
+                    Without BOTH = impossible to decompress!
+                </div>
+
+                <label>Compressed text:</label>
+                <textarea id="decompressInput" placeholder="Paste compressed text here..."></textarea>
+
+                <label>Alphabet Key (required for Level 7):</label>
+                <input type="text" id="alphabetKeyInput" placeholder="26 characters" maxlength="26">
+
+                <button onclick="decompressManual()">Decompress</button>
+
+                <div class="error" id="decompressError"></div>
+
+                <div class="result" id="decompressResult">
+                    <h3>Decompressed Text</h3>
+                    <div class="result-text" id="manualDecompressedText"></div>
+
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-label">Key Provided</div>
+                            <div class="stat-value" id="keyStatus">-</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Found in DB</div>
+                            <div class="stat-value" id="dbStatus">-</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Key Match</div>
+                            <div class="stat-value" id="matchStatus">-</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Success</div>
+                            <div class="stat-value" id="successStatus">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function compressText() {
+            const text = document.getElementById('inputText').value.trim();
+            const level = parseInt(document.getElementById('levelSelect').value);
+            const errorDiv = document.getElementById('compressError');
+            const resultDiv = document.getElementById('compressResult');
+
+            errorDiv.classList.remove('show');
+            resultDiv.classList.remove('show');
+
+            if (!text) {
+                errorDiv.textContent = 'Please enter text to compress';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            try {
+                const response = await fetch('/compress', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text: text, level: level})
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    errorDiv.textContent = data.error;
+                    errorDiv.classList.add('show');
+                    return;
+                }
+
+                document.getElementById('compressedText').textContent = data.compressed;
+                document.getElementById('originalSize').textContent = data.original_size;
+                document.getElementById('compressedSize').textContent = data.compressed_size;
+                document.getElementById('compressionRatio').textContent = data.compression_ratio + '%';
+                document.getElementById('levelUsed').textContent = data.level;
+
+                // Show alphabet key for Level 7
+                const keyDisplay = document.getElementById('alphabetKeyDisplay');
+                if (data.level === 7 && data.alphabet_key) {
+                    keyDisplay.innerHTML = `
+                        <div class="key-display">
+                            <strong>Alphabet Key (Level 7):</strong>
+                            <code>${data.alphabet_key}</code>
+                            <small style="display: block; margin-top: 10px; color: #856404;">
+                                Save this key AND compressed text to decompress without database access!
+                            </small>
+                        </div>
+                    `;
+                    keyDisplay.style.display = 'block';
+                } else {
+                    keyDisplay.style.display = 'none';
+                }
+
+                resultDiv.classList.add('show');
+
+            } catch (error) {
+                errorDiv.textContent = 'Error: ' + error.message;
+                errorDiv.classList.add('show');
+            }
+        }
+
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const errorDiv = document.getElementById('uploadError');
+            const resultDiv = document.getElementById('uploadResult');
+
+            errorDiv.classList.remove('show');
+            resultDiv.classList.remove('show');
+
+            if (!fileInput.files[0]) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    errorDiv.textContent = data.error;
+                    errorDiv.classList.add('show');
+                    return;
+                }
+
+                document.getElementById('decompressedContent').textContent = data.decompressed;
+                document.getElementById('uploadCompressedSize').textContent = data.compressed_size;
+                document.getElementById('uploadDecompressedSize').textContent = data.decompressed_size;
+
+                resultDiv.classList.add('show');
+
+            } catch (error) {
+                errorDiv.textContent = 'Error: ' + error.message;
+                errorDiv.classList.add('show');
+            }
+        }
+
+        async function decompressManual() {
+            const compressedText = document.getElementById('decompressInput').value.trim();
+            const alphabetKey = document.getElementById('alphabetKeyInput').value.trim();
+            const errorDiv = document.getElementById('decompressError');
+            const resultDiv = document.getElementById('decompressResult');
+
+            errorDiv.classList.remove('show');
+            resultDiv.classList.remove('show');
+
+            if (!compressedText) {
+                errorDiv.textContent = 'Please enter compressed text';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            if (alphabetKey && alphabetKey.length !== 26) {
+                errorDiv.textContent = 'Alphabet key must be exactly 26 characters';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            try {
+                const response = await fetch('/decompress_manual', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        compressed_text: compressedText,
+                        alphabet_key: alphabetKey
+                    })
+                });
+
+                const data = await response.json();
+
+                // Update status indicators
+                document.getElementById('keyStatus').textContent = data.has_alphabet_key ? '✓' : '✗';
+                document.getElementById('dbStatus').textContent = data.db_decompression_success ? '✓' : '✗';
+                document.getElementById('matchStatus').textContent = data.key_match ? '✓' : '✗';
+
+                if (data.success && data.decompressed_from_db) {
+                    document.getElementById('manualDecompressedText').textContent = data.decompressed_from_db;
+                    document.getElementById('successStatus').textContent = '✓';
+                } else {
+                    const errorMsg = data.db_decompression_error || 'Unable to decompress';
+                    document.getElementById('manualDecompressedText').textContent = errorMsg;
+                    document.getElementById('successStatus').textContent = '✗';
+                }
+
+                resultDiv.classList.add('show');
+
+            } catch (error) {
+                errorDiv.textContent = 'Error: ' + error.message;
+                errorDiv.classList.add('show');
+            }
+        }
+    </script>
+</body>
+</html>
