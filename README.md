@@ -120,6 +120,15 @@ OUTPUT:   "sgd adr ddy idg lgd H" (key: jpkmduqvanchylifbsrgowextz)
 
 **Decompression:** Dictionary lookup + key reversal = 100% accurate
 
+## 🎯 Quick Demo
+
+Visit the web interface and try the example already in the database:
+- Compressed text
+- Level 7 alphabet key
+- Decompress it to see the original message
+
+This demonstrates the two-key lock: without BOTH the compressed text AND the alphabet key, reconstruction is impossible.
+
 ---
 
 ## ⚡ Philosophy
