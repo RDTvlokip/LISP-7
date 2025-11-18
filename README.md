@@ -36,7 +36,7 @@ Same plaintext → completely different outputs every time
 
 ## 📚 Paper & Citation
 
-**Zenodo:** https://doi.org/10.5281/zenodo.XXXXXXX
+**Zenodo:** https://doi.org/10.5281/zenodo.17638778
 
 ```bibtex
 @misc{charlet_2025_lisp7,
@@ -44,8 +44,8 @@ Same plaintext → completely different outputs every time
   title        = {LISP-7: Linguistic Irreversible Scrambling Protocol
                   — Destructive Semantic Encoding (DSE)},
   year         = 2025,
-  doi          = {10.5281/zenodo.XXXXXXX},
-  url          = {https://doi.org/10.5281/zenodo.XXXXXXX}
+  doi          = {10.5281/zenodo.17638778},
+  url          = {https://doi.org/10.5281/zenodo.17638778}
 }
 ```
 
