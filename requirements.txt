@@ -1,0 +1,11 @@
+# LISP-7: Linguistic Irreversible Scrambling Protocol
+# Core dependencies (stdlib only for compression)
+
+# Web interface dependencies
+flask>=2.0.0
+
+# Optional: for testing
+pytest>=7.0.0
+
+# Note: The core LISP-7 library uses only Python stdlib
+# (sqlite3, hashlib, random, os)
