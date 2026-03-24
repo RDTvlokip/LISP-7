@@ -139,5 +139,5 @@ LISP-7 answers: **Destroy, don't hide.** 🔐
 
 ---
 
-**Author:** Théo Charlet (RDTvlokip) — TSSR Student, Nepsod/Bel Air School  
+**Author:** Théo Charlet (RDTvlokip)
 **License:** CC BY-SA 4.0
